@@ -9,15 +9,13 @@ Este repositorio contiene los notebooks y materiales desarrollados para el Traba
 - Diseñar un dashboard para visualizar y monitorear métricas éticas.
 
 ## 📁 Estructura del repositorio
-
+```markdown
 ├── notebooks/ # Notebooks de análisis y modelado
 ├── data/ # Datos utilizados (no incluidos por privacidad)
 ├── docs/ # Documentación adicional
 ├── requirements.txt # Librerías necesarias
 └── README.md # Este archivo
-
-
-
+```
 
 ## 🧪 Cómo reproducir el entorno
 
@@ -46,14 +44,18 @@ Looker Studio (dashboard final)
 
 Git & GitHub
 
-👨‍💻 Autores
+## 👥 Autores
 
--Azahara Bravo
--Daniel Alvarez
--Maria Loza
-TFM – Máster en Data Analytics
-Nuclio Digital School
-📄 Licencia
+- Azahara Bravo  
+- Daniel Álvarez  
+- María Loza  
+
+**TFM – Máster en Data Analytics – Nuclio Digital School**
+
+---
+
+## 📄 Licencia
 
 Este repositorio es solo para fines académicos. Prohibido el uso comercial sin autorización.
+
 
