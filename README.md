@@ -1,6 +1,3 @@
-# TFM_Compas
-Análisis de sesgos en el sistema COMPAS para el TFM
-
 # TFM – Análisis de Sesgos en el Sistema COMPAS
 
 Este repositorio contiene los notebooks y materiales desarrollados para el Trabajo Final de Máster (TFM), cuyo objetivo es analizar los sesgos del sistema de evaluación de riesgo de reincidencia penal COMPAS, desarrollar un modelo alternativo más justo y proponer un sistema de visualización y monitoreo ético.
