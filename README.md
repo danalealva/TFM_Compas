@@ -20,9 +20,6 @@ Este repositorio contiene los notebooks y materiales desarrollados para el Traba
 └── README.md # Este archivo
 
 
-## 🧪 Cómo reproducir el entorno
-
-1. Clona este repositorio:
 
 
 ## 🧪 Cómo reproducir el entorno
@@ -32,10 +29,10 @@ Este repositorio contiene los notebooks y materiales desarrollados para el Traba
 ```bash
 git clone https://github.com/tu-usuario/tfm-compas.git
 cd tfm-compas
+```
 
-
-
-
+2.Instala las dependencias necesarias:
+```bash
 pip install -r requirements.txt
 ```
 
@@ -54,9 +51,9 @@ Git & GitHub
 
 👨‍💻 Autores
 
-Azahara Bravo
-Daniel Alvarez
-Maria Loza
+-Azahara Bravo
+-Daniel Alvarez
+-Maria Loza
 TFM – Máster en Data Analytics
 Nuclio Digital School
 📄 Licencia
