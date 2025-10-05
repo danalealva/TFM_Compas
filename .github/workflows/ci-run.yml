@@ -11,6 +11,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          lfs: true  # baja binarios si los CSV están en Git LFS
 
       - name: Configurar Python 3.12.9
         uses: actions/setup-python@v5
@@ -20,7 +22,7 @@ jobs:
       - name: Instalar dependencias
         run: |
           python -m pip install --upgrade pip
-          # Elimina líneas 'python==' si aparecen en requisitos (defensivo)
+          # Elimina líneas 'python==' en requirements (defensivo)
           for f in requirements_tfm.txt requirements.txt; do
             if [ -f "$f" ]; then sed -i '/^python[<=>]/d' "$f"; fi
           done
@@ -31,7 +33,7 @@ jobs:
           else
             pip install jupyter nbconvert nbclient nbformat ipykernel numpy pandas scikit-learn matplotlib plotly seaborn
           fi
-          # Asegurar dependencias usadas en lib_propias.py y lectura de ficheros
+          # Asegurar libs usadas en lib_propias.py y lectura de ficheros
           pip install missingno==0.5.2 openpyxl pyarrow
 
       - name: Exportar PYTHONPATH (repo root y /lib)
@@ -52,12 +54,31 @@ jobs:
           echo "== data/raw_propublica ==" && ls -lah data/raw_propublica || true
           echo "== export_dashboard ==" && ls -lah export_dashboard || true
 
-      - name: Comprobación de datos mínimos (raw_propublica)
+      - name: Inspeccionar CSVs (tamaño + 5 primeras líneas)
         run: |
-          if [ ! -f data/raw_propublica/compas-scores-two-years.csv ] || [ ! -f data/raw_propublica/compas-scores-raw.csv ]; then
-            echo "::error::Faltan CSV en data/raw_propublica/. Sube compas-scores-two-years.csv y compas-scores-raw.csv";
-            exit 1;
-          fi
+          for f in compas-scores-raw.csv compas-scores-two-years.csv; do
+            p="data/raw_propublica/$f"
+            echo "== $p =="
+            if [ -f "$p" ]; then
+              echo "-- bytes --"; wc -c "$p" || true
+              echo "-- head --"; head -n 5 "$p" || true
+            else
+              echo "NO ENCONTRADO"
+            fi
+            echo
+          done
+
+      - name: Validar que los CSVs no están vacíos
+        run: |
+          for p in data/raw_propublica/compas-scores-raw.csv data/raw_propublica/compas-scores-two-years.csv; do
+            if [ ! -f "$p" ]; then
+              echo "::error::No existe $p"; exit 1;
+            fi
+            BYTES=$(wc -c < "$p")
+            if [ "$BYTES" -lt 10 ]; then
+              echo "::error::$p está vacío o es un puntero LFS (descargado sin contenido)."; exit 1;
+            fi
+          done
 
       - name: Ejecutar notebook 1 (comodín)
         run: |
@@ -87,8 +108,8 @@ jobs:
           else
             echo "AVISO: falta export_dashboard/metricas_globales.csv"
           fi
-          if [ -f export_dashboard/metricas_por_grupo.csv ]; then
-            echo "OK: export_dashboard/metricas_por_grupo.csv"
+          if [ -f export_dashboard/metricicas_por_grupo.csv ]; then
+            echo "OK: export_dashboard/metricicas_por_grupo.csv"
           else
-            echo "AVISO: falta export_dashboard/metricas_por_grupo.csv"
+            echo "AVISO: falta export_dashboard/metricicas_por_grupo.csv"
           fi
