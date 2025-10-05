@@ -6,25 +6,45 @@ on:
 jobs:
   run-notebooks:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Configurar Python
+      - name: Configurar Python 3.12.9
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.12.9'
 
       - name: Instalar dependencias
         run: |
           python -m pip install --upgrade pip
-          # Si tienes este archivo, úsalo:
           if [ -f requirements_tfm.txt ]; then
             pip install -r requirements_tfm.txt
-          # Si no, instala un mínimo común para ejecutar notebooks
           else
             pip install jupyter nbconvert ipykernel numpy pandas scikit-learn matplotlib plotly seaborn
           fi
 
-      - name: Preparar carpetas y (opcional) subset de datos
+      - name: Preparar carpetas
         run: |
+          mkdir -p data/raw data/processed export_dashboard
+
+      # Si subes un subset ligero a data/raw/ (p. ej., compas_subset.csv),
+      # tus notebooks deberían detectarlo en la primera celda (fallback).
+
+      - name: Ejecutar 1_eda_sesgos_twoyears_propublica
+        run: |
+          jupyter nbconvert --execute --to notebook --inplace "notebooks/1_eda_sesgos_twoyears_propublica.ipynb"
+
+      - name: Ejecutar 2_evaluacion_y_regresion_logisitca
+        run: |
+          jupyter nbconvert --execute --to notebook --inplace "notebooks/2_evaluacion_y_regresion_logisitca.ipynb"
+
+      - name: Ejecutar 3_analisis_controversia_propublica
+        run: |
+          jupyter nbconvert --execute --to notebook --inplace "notebooks/3_analisis_controversia_propublica.ipynb"
+
+      - name: Comprobar salidas esperadas (si aplican)
+        run: |
+          test -f export_dashboard/metricas_globales.csv || echo "AVISO: falta export_dashboard/metricas_globales.csv"
+          test -f export_dashboard/metricas_por_grupo.csv || echo "AVISO: falta export_dashboard/metricas_por_grupo.csv"
