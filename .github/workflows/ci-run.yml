@@ -1,0 +1,93 @@
+name: CI - Ejecutar notebooks TFM
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  run-notebooks:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configurar Python 3.12.9
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12.9'
+
+      - name: Instalar dependencias
+        run: |
+          python -m pip install --upgrade pip
+          # Limpia líneas de "python==" en requirements si las hubiera
+          for f in requirements_tfm.txt requirements.txt; do
+            if [ -f "$f" ]; then sed -i '/^python[<=>]/d' "$f"; fi
+          done
+          if [ -f requirements_tfm.txt ]; then
+            pip install -r requirements_tfm.txt
+          elif [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          else
+            pip install jupyter nbconvert nbclient nbformat ipykernel numpy pandas scikit-learn matplotlib plotly seaborn missingno
+          fi
+          # Lectura de ficheros comunes
+          pip install openpyxl pyarrow
+          # Si existe pyproject.toml, instala tu módulo local (lib_propias)
+          if [ -f pyproject.toml ]; then pip install -e .; fi
+
+      - name: Exportar PYTHONPATH (repo root y /lib)
+        run: |
+          echo "PYTHONPATH=$GITHUB_WORKSPACE:$GITHUB_WORKSPACE/lib" >> $GITHUB_ENV
+
+      - name: Preparar carpetas
+        run: |
+          mkdir -p data/raw_propublica data/processed export_dashboard
+
+      - name: Debug: árbol del repo
+        run: |
+          echo "== pwd ==" && pwd
+          echo "== notebooks ==" && ls -lah notebooks || true
+          echo "== data/raw_propublica ==" && ls -lah data/raw_propublica || true
+          echo "== export_dashboard ==" && ls -lah export_dashboard || true
+
+      - name: Comprobación de datos mínimos (raw_propublica)
+        run: |
+          if [ ! -f data/raw_propublica/compas-scores-two-years.csv ] || [ ! -f data/raw_propublica/compas-scores-raw.csv ]; then
+            echo "::error::Faltan CSV en data/raw_propublica/. Sube compas-scores-two-years.csv y compas-scores-raw.csv";
+            exit 1;
+          fi
+
+      - name: Ejecutar notebook 1 (comodín)
+        run: |
+          NB1=$(ls -1 notebooks/1_*.ipynb 2>/dev/null | head -n 1 || true)
+          if [ -z "$NB1" ]; then echo "::error::No se encontró notebooks/1_*.ipynb"; exit 1; fi
+          echo "Ejecutando: $NB1"
+          jupyter nbconvert --execute --to notebook --inplace --ExecutePreprocessor.timeout=1200 "$NB1"
+
+      - name: Ejecutar notebook 2 (comodín)
+        run: |
+          NB2=$(ls -1 notebooks/2_*.ipynb 2>/dev/null | head -n 1 || true)
+          if [ -z "$NB2" ]; then echo "::error::No se encontró notebooks/2_*.ipynb"; exit 1; fi
+          echo "Ejecutando: $NB2"
+          jupyter nbconvert --execute --to notebook --inplace --ExecutePreprocessor.timeout=1200 "$NB2"
+
+      - name: Ejecutar notebook 3 (comodín)
+        run: |
+          NB3=$(ls -1 notebooks/3_*.ipynb 2>/dev/null | head -n 1 || true)
+          if [ -z "$NB3" ]; then echo "::error::No se encontró notebooks/3_*.ipynb"; exit 1; fi
+          echo "Ejecutando: $NB3"
+          jupyter nbconvert --execute --to notebook --inplace --ExecutePreprocessor.timeout=1200 "$NB3"
+
+      - name: Comprobar salidas (si aplican)
+        run: |
+          if [ -f export_dashboard/metricas_globales.csv ]; then
+            echo "OK: export_dashboard/metricas_globales.csv"
+          else
+            echo "AVISO: falta export_dashboard/metricas_globales.csv"
+          fi
+          if [ -f export_dashboard/metricas_por_grupo.csv ]; then
+            echo "OK: export_dashboard/metricicas_por_grupo.csv"
+          else
+            echo "AVISO: falta export_dashboard/metricicas_por_grupo.csv"
+          fi
