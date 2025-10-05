@@ -14,6 +14,12 @@ jobs:
         with:
           lfs: true  # baja binarios si usas Git LFS
 
+      - name: Forzar descarga de LFS (si aplica)
+        run: |
+          git lfs version || true
+          git lfs fetch --all || true
+          git lfs checkout || true
+
       - name: Configurar Python 3.12.9
         uses: actions/setup-python@v5
         with:
@@ -35,51 +41,72 @@ jobs:
           fi
           # Libs usadas en lib_propias y lectura de ficheros
           pip install missingno==0.5.2 openpyxl pyarrow
-          pip install fuzzywuzzy==0.18.0
-          pip install python-Levenshtein
+          pip install fuzzywuzzy==0.18.0 python-Levenshtein
 
       - name: Exportar PYTHONPATH (repo root y /lib)
         run: echo "PYTHONPATH=$GITHUB_WORKSPACE:$GITHUB_WORKSPACE/lib" >> $GITHUB_ENV
 
+      - name: Bootstrap de Python (sitecustomize para Path)
+        run: |
+          cat > sitecustomize.py << 'PY'
+          import builtins
+          from pathlib import Path
+          # Hacemos disponible Path sin importarlo en cada notebook
+          builtins.Path = Path
+          PY
+
       - name: Hacer visible lib_propias sin tocar notebooks
         run: |
+          # Copiamos el módulo al raíz si existe en lib/
           if [ -f lib/lib_propias.py ]; then cp lib/lib_propias.py .; fi
 
-      - name: Preparar carpetas
-        run: mkdir -p data/raw_propublica data/processed export_dashboard
+      - name: Preparar carpetas y compatibilidad de rutas
+        run: |
+          mkdir -p data/raw_propublica data/processed export_dashboard
+          # Si algún notebook usa data/raw, enlázalo a raw_propublica
+          if [ ! -d data/raw ]; then
+            (cd data && ln -s raw_propublica raw)
+          fi
 
       - name: "Debug: árbol del repo"
         run: |
           echo "== pwd ==" && pwd
           echo "== notebooks ==" && ls -lah notebooks || true
           echo "== data/raw_propublica ==" && ls -lah data/raw_propublica || true
+          echo "== data/raw (compat) ==" && ls -lah data/raw || true
           echo "== export_dashboard ==" && ls -lah export_dashboard || true
 
       - name: Inspeccionar CSVs (tamaño + 5 primeras líneas)
         run: |
           for f in compas-scores-raw.csv compas-scores-two-years.csv; do
-            p="data/raw_propublica/$f"
-            echo "== $p =="
-            if [ -f "$p" ]; then
-              echo "-- bytes --"; wc -c "$p" || true
-              echo "-- head --"; head -n 5 "$p" || true
-            else
-              echo "NO ENCONTRADO"
-            fi
+            for base in data/raw_propublica data/raw; do
+              p="$base/$f"
+              echo "== $p =="
+              if [ -f "$p" ]; then
+                echo "-- bytes --"; wc -c "$p" || true
+                echo "-- head --"; head -n 5 "$p" || true
+                break
+              fi
+            done
             echo
           done
 
       - name: Validar que los CSVs no están vacíos
         run: |
-          for p in data/raw_propublica/compas-scores-raw.csv data/raw_propublica/compas-scores-two-years.csv; do
-            if [ ! -f "$p" ]; then
-              echo "::error::No existe $p"; exit 1;
+          ok=1
+          for f in compas-scores-raw.csv compas-scores-two-years.csv; do
+            p=""
+            if [ -f "data/raw_propublica/$f" ]; then p="data/raw_propublica/$f"; fi
+            if [ -z "$p" ] && [ -f "data/raw/$f" ]; then p="data/raw/$f"; fi
+            if [ -z "$p" ]; then
+              echo "::error::No existe $f en data/raw_propublica ni en data/raw"; ok=0; continue
             fi
             BYTES=$(wc -c < "$p")
             if [ "$BYTES" -lt 10 ]; then
-              echo "::error::$p está vacío o es un puntero LFS"; exit 1;
+              echo "::error::$p está vacío o es un puntero LFS"; ok=0
             fi
           done
+          if [ "$ok" -ne 1 ]; then exit 1; fi
 
       - name: Ejecutar notebook 1 (comodín)
         run: |
@@ -114,4 +141,3 @@ jobs:
           else
             echo "AVISO: falta export_dashboard/metricas_por_grupo.csv"
           fi
-
