@@ -12,7 +12,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          lfs: true  # baja binarios si los CSV están en Git LFS
+          lfs: true  # baja binarios si usas Git LFS
 
       - name: Configurar Python 3.12.9
         uses: actions/setup-python@v5
@@ -22,7 +22,7 @@ jobs:
       - name: Instalar dependencias
         run: |
           python -m pip install --upgrade pip
-          # Elimina líneas 'python==' en requirements (defensivo)
+          # Quita cualquier línea 'python==' de requirements (defensivo)
           for f in requirements_tfm.txt requirements.txt; do
             if [ -f "$f" ]; then sed -i '/^python[<=>]/d' "$f"; fi
           done
@@ -33,15 +33,16 @@ jobs:
           else
             pip install jupyter nbconvert nbclient nbformat ipykernel numpy pandas scikit-learn matplotlib plotly seaborn
           fi
-          # Asegurar libs usadas en lib_propias.py y lectura de ficheros
+          # Libs usadas en lib_propias y lectura de ficheros
           pip install missingno==0.5.2 openpyxl pyarrow
+          pip install fuzzywuzzy==0.18.0
+          pip install python-Levenshtein
 
       - name: Exportar PYTHONPATH (repo root y /lib)
         run: echo "PYTHONPATH=$GITHUB_WORKSPACE:$GITHUB_WORKSPACE/lib" >> $GITHUB_ENV
 
       - name: Hacer visible lib_propias sin tocar notebooks
         run: |
-          # Copiamos el módulo al raíz si existe en lib/
           if [ -f lib/lib_propias.py ]; then cp lib/lib_propias.py .; fi
 
       - name: Preparar carpetas
@@ -76,7 +77,7 @@ jobs:
             fi
             BYTES=$(wc -c < "$p")
             if [ "$BYTES" -lt 10 ]; then
-              echo "::error::$p está vacío o es un puntero LFS (descargado sin contenido)."; exit 1;
+              echo "::error::$p está vacío o es un puntero LFS"; exit 1;
             fi
           done
 
@@ -108,8 +109,9 @@ jobs:
           else
             echo "AVISO: falta export_dashboard/metricas_globales.csv"
           fi
-          if [ -f export_dashboard/metricicas_por_grupo.csv ]; then
-            echo "OK: export_dashboard/metricicas_por_grupo.csv"
+          if [ -f export_dashboard/metricas_por_grupo.csv ]; then
+            echo "OK: export_dashboard/metricas_por_grupo.csv"
           else
-            echo "AVISO: falta export_dashboard/metricicas_por_grupo.csv"
+            echo "AVISO: falta export_dashboard/metricas_por_grupo.csv"
           fi
+
