@@ -56,6 +56,7 @@ Git & GitHub
 
 ## 📄 Licencia
 
-Este repositorio es solo para fines académicos. Prohibido el uso comercial sin autorización.
+Este repositorio es solo para fines académicos. Prohibido el uso comercial sin autorización..
+
 
 
