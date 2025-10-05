@@ -1,0 +1,64 @@
+name: CI - Ejecutar notebooks TFM
+on:
+  push:
+  pull_request:
+  workflow_dispatch:   # <- habilita el botón "Run workflow"
+
+jobs:
+  run-notebooks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configurar Python 3.12.9
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12.9'
+
+      - name: Instalar dependencias
+        run: |
+          python -m pip install --upgrade pip
+          # Quita cualquier línea "python==" de los requirements (defensivo)
+          for f in requirements_tfm.txt requirements.txt; do
+            if [ -f "$f" ]; then sed -i '/^python[<=>]/d' "$f"; fi
+          done
+          if [ -f requirements_tfm.txt ]; then
+            pip install -r requirements_tfm.txt
+          elif [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          else
+            pip install jupyter nbconvert nbclient nbformat ipykernel numpy pandas scikit-learn matplotlib plotly seaborn
+          fi
+          pip install openpyxl pyarrow
+
+      - name: Mostrar árbol (debug)
+        run: |
+          echo "== pwd ==" && pwd
+          echo "== notebooks ==" && ls -lah notebooks || true
+          echo "== data/raw_propublica ==" && ls -lah data/raw_propublica || true
+
+      - name: Comprobación de datos mínimos (raw_propublica)
+        run: |
+          if [ ! -f data/raw_propublica/compas-scores-two-years.csv ] || [ ! -f data/raw_propublica/compas-scores-raw.csv ]; then
+            echo "::error::Faltan CSV en data/raw_propublica/. Sube compas-scores-two-years.csv y compas-scores-raw.csv";
+            exit 1;
+          fi
+
+      - name: Ejecutar notebook 1 (comodín)
+        run: |
+          NB1=$(ls -1 notebooks/1_*.ipynb 2>/dev/null | head -n 1 || true)
+          if [ -z "$NB1" ]; then echo "::error::No se encontró notebooks/1_*.ipynb"; exit 1; fi
+          jupyter nbconvert --execute --to notebook --inplace --ExecutePreprocessor.timeout=900 "$NB1"
+
+      - name: Ejecutar notebook 2 (comodín)
+        run: |
+          NB2=$(ls -1 notebooks/2_*.ipynb 2>/dev/null | head -n 1 || true)
+          if [ -z "$NB2" ]; then echo "::error::No se encontró notebooks/2_*.ipynb"; exit 1; fi
+          jupyter nbconvert --execute --to notebook --inplace --ExecutePreprocessor.timeout=900 "$NB2"
+
+      - name: Ejecutar notebook 3 (comodín)
+        run: |
+          NB3=$(ls -1 notebooks/3_*.ipynb 2>/dev/null | head -n 1 || true)
+          if [ -z "$NB3" ]; then echo "::error::No se encontró notebooks/3_*.ipynb"; exit 1; fi
+          jupyter nbconvert --execute --to notebook --inplace --ExecutePreprocessor.timeout=900 "$NB3"
