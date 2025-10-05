@@ -30,9 +30,18 @@ jobs:
         run: |
           mkdir -p data/raw data/processed export_dashboard
 
-      - name: Ejecutar 1_eda_sesgos_twoyears_propublica
+           - name: Ejecutar notebook 1 (debug + comodín)
         run: |
-          jupyter nbconvert --execute --to notebook --inplace "notebooks/1_eda_sesgos_twoyears_propublica.ipynb"
+          echo "== PWD ==" && pwd
+          echo "== LISTA notebooks ==" && ls -lah notebooks || true
+          NB1=$(ls -1 notebooks/1_eda_sesgos_twoyears_propublica*.ipynb 2>/dev/null | head -n 1 || true)
+          if [ -z "$NB1" ]; then
+            echo "::error::No se encontró notebooks/1_eda_sesgos_twoyears_propublica*.ipynb en esta rama/commit";
+            exit 1
+          fi
+          echo "Ejecutando: $NB1"
+          jupyter nbconvert --execute --to notebook --inplace --ExecutePreprocessor.timeout=900 "$NB1"
+
 
       - name: Ejecutar 2_evaluacion_y_regresion_logisitca
         run: |
