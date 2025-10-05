@@ -2,7 +2,7 @@ name: CI - Ejecutar notebooks TFM
 on:
   push:
   pull_request:
-  workflow_dispatch:
+  workflow_dispatch:   # habilita el botón “Run workflow”
 
 jobs:
   run-notebooks:
@@ -20,7 +20,7 @@ jobs:
       - name: Instalar dependencias
         run: |
           python -m pip install --upgrade pip
-          # Limpia líneas de "python==" en requirements si las hubiera
+          # Elimina líneas 'python==' en requirements (defensivo)
           for f in requirements_tfm.txt requirements.txt; do
             if [ -f "$f" ]; then sed -i '/^python[<=>]/d' "$f"; fi
           done
@@ -31,18 +31,12 @@ jobs:
           else
             pip install jupyter nbconvert nbclient nbformat ipykernel numpy pandas scikit-learn matplotlib plotly seaborn missingno
           fi
-          # Lectura de ficheros comunes
           pip install openpyxl pyarrow
-          # Si existe pyproject.toml, instala tu módulo local (lib_propias)
-          if [ -f pyproject.toml ]; then pip install -e .; fi
 
+      # Para que no toques los notebooks: añade raíz y /lib al PYTHONPATH
       - name: Exportar PYTHONPATH (repo root y /lib)
         run: |
           echo "PYTHONPATH=$GITHUB_WORKSPACE:$GITHUB_WORKSPACE/lib" >> $GITHUB_ENV
-
-      - name: Preparar carpetas
-        run: |
-          mkdir -p data/raw_propublica data/processed export_dashboard
 
       - name: Debug: árbol del repo
         run: |
