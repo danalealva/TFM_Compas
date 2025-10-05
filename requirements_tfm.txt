@@ -4,8 +4,8 @@ numpy==1.26.4
 
 # Visualización
 matplotlib==3.8.4
-plotly==5.22.0
 seaborn==0.13.2
+plotly==5.22.0
 
 # Ciencia de datos
 scikit-learn==1.4.2
@@ -16,11 +16,16 @@ statsmodels==0.14.2
 jupyterlab==4.1.6
 ipykernel==6.29.4
 
-# SQL (por si abrís conexiones)
-SQLAlchemy==2.0.29
-mysql-connector-python==8.4.0
-
-# Utilidades
+# Limpieza / utilidades
+missingno==0.5.2
+fuzzywuzzy==0.18.0
+python-Levenshtein
 pyyaml==6.0.1
 python-dotenv==1.0.1
+openpyxl
+pyarrow
+
+# SQL (si lo usas)
+SQLAlchemy==2.0.29
+mysql-connector-python==8.4.0
 
