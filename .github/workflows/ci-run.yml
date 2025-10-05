@@ -48,7 +48,7 @@ jobs:
         run: |
           mkdir -p data/raw_propublica data/processed export_dashboard
 
-      - name: Debug: árbol del repo
+      - name: "Debug: árbol del repo"
         run: |
           echo "== pwd ==" && pwd
           echo "== notebooks ==" && ls -lah notebooks || true
@@ -90,8 +90,8 @@ jobs:
           else
             echo "AVISO: falta export_dashboard/metricas_globales.csv"
           fi
-          if [ -f export_dashboard/metricicas_por_grupo.csv ]; then
-            echo "OK: export_dashboard/metricicas_por_grupo.csv"
+          if [ -f export_dashboard/metricas_por_grupo.csv ]; then
+            echo "OK: export_dashboard/metricas_por_grupo.csv"
           else
-            echo "AVISO: falta export_dashboard/metricicas_por_grupo.csv"
+            echo "AVISO: falta export_dashboard/metricas_por_grupo.csv"
           fi
