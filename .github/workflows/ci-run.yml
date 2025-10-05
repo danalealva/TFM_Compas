@@ -29,24 +29,21 @@ jobs:
           elif [ -f requirements.txt ]; then
             pip install -r requirements.txt
           else
-            pip install jupyter nbconvert nbclient nbformat ipykernel numpy pandas scikit-learn matplotlib plotly seaborn missingno
+            pip install jupyter nbconvert nbclient nbformat ipykernel numpy pandas scikit-learn matplotlib plotly seaborn
           fi
-          # Soporte lectura de ficheros comunes
-          pip install openpyxl pyarrow
+          # Asegurar dependencias usadas en lib_propias.py y lectura de ficheros
+          pip install missingno==0.5.2 openpyxl pyarrow
 
       - name: Exportar PYTHONPATH (repo root y /lib)
-        run: |
-          echo "PYTHONPATH=$GITHUB_WORKSPACE:$GITHUB_WORKSPACE/lib" >> $GITHUB_ENV
+        run: echo "PYTHONPATH=$GITHUB_WORKSPACE:$GITHUB_WORKSPACE/lib" >> $GITHUB_ENV
 
       - name: Hacer visible lib_propias sin tocar notebooks
         run: |
-          # Copiamos el módulo al raíz y añadimos rutas al PYTHONPATH
+          # Copiamos el módulo al raíz si existe en lib/
           if [ -f lib/lib_propias.py ]; then cp lib/lib_propias.py .; fi
-          echo "PYTHONPATH=$GITHUB_WORKSPACE:$GITHUB_WORKSPACE/lib" >> $GITHUB_ENV
 
       - name: Preparar carpetas
-        run: |
-          mkdir -p data/raw_propublica data/processed export_dashboard
+        run: mkdir -p data/raw_propublica data/processed export_dashboard
 
       - name: "Debug: árbol del repo"
         run: |
