@@ -1,0 +1,30 @@
+name: CI - Ejecutar notebooks TFM
+on:
+  push:
+  pull_request:
+
+jobs:
+  run-notebooks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalar dependencias
+        run: |
+          python -m pip install --upgrade pip
+          # Si tienes este archivo, úsalo:
+          if [ -f requirements_tfm.txt ]; then
+            pip install -r requirements_tfm.txt
+          # Si no, instala un mínimo común para ejecutar notebooks
+          else
+            pip install jupyter nbconvert ipykernel numpy pandas scikit-learn matplotlib plotly seaborn
+          fi
+
+      - name: Preparar carpetas y (opcional) subset de datos
+        run: |
