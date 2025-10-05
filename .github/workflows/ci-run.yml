@@ -2,11 +2,11 @@ name: CI - Ejecutar notebooks TFM
 on:
   push:
   pull_request:
+  workflow_dispatch:   # ← esto permite lanzarlo manualmente desde Actions
 
 jobs:
   run-notebooks:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -24,13 +24,11 @@ jobs:
           else
             pip install jupyter nbconvert ipykernel numpy pandas scikit-learn matplotlib plotly seaborn
           fi
+          pip install nbclient  # recomendado para que nbconvert ejecute notebooks
 
       - name: Preparar carpetas
         run: |
           mkdir -p data/raw data/processed export_dashboard
-
-      # Si subes un subset ligero a data/raw/ (p. ej., compas_subset.csv),
-      # tus notebooks deberían detectarlo en la primera celda (fallback).
 
       - name: Ejecutar 1_eda_sesgos_twoyears_propublica
         run: |
@@ -48,3 +46,4 @@ jobs:
         run: |
           test -f export_dashboard/metricas_globales.csv || echo "AVISO: falta export_dashboard/metricas_globales.csv"
           test -f export_dashboard/metricas_por_grupo.csv || echo "AVISO: falta export_dashboard/metricas_por_grupo.csv"
+
