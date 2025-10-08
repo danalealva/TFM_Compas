@@ -16,19 +16,32 @@ El TFM analiza los **sesgos algorítmicos** que pueden surgir en su funcionamien
 ## 📁 Estructura del repositorio
 
 ```text
-├─ notebooks/                   # 1_, 2_, 3_* (EDA, modelado, análisis)
-├─ data/
-│  ├─ raw_propublica/           # compas-scores-raw.csv, compas-scores-two-years.csv
-│  └─ processed/                # artefactos generados (p. ej., compas_twoyears.csv)
-├─ export_dashboard/            # salidas para el dashboard (métricas_*.csv)
-├─ dashboard/
-│  └─ app.py                    # Streamlit (visualización de métricas)
-├─ lib/
-│  └─ lib_propias.py            # utilidades del proyecto
-├─ .github/workflows/ci-run.yml # CI: ejecuta notebooks end-to-end (Python 3.12.9)
-├─ requirements_tfm.txt         # librerías necesarias (pip)
-├─ environment.yml              # alternativa con Conda (opcional)
-└─ README.md
+├── .github/
+│   └── workflows/                     
+├── dashboards/
+│   ├── dashboards_evaluacion_comparacion_compas.pdf  
+│   ├── readme_dashboards             
+│   └── dashboards_compas_logistica_link.txt  
+├── data/
+│   ├── raw_propublica/              
+│   │   ├── compas_scores_raw.csv     
+│   │   └── compas-scores-two-years.csv  
+│   ├── processed/                     
+│   │   ├── compas_twoyears.csv        
+│   │   └── metricas_looker_v2.csv     
+├── docs/                              
+│   └── MEMORIA DEL PROYECTO.pdf       
+├── lib/                               
+│   └── lib_propias.py                 
+├── notebooks/                         
+│   ├── 1_eda_sesgos_twoyears_propublica.ipynb
+│   ├── 2_evaluacion_y_regresion_logisitca.ipynb
+│   ├── 3_analisis_controversia_propublica.ipynb
+│   └── lib_propias.py                 
+├── README.md                          
+├── environment.yml                    
+└── requirements_tfm.txt               
+
 ```
 
 ---
