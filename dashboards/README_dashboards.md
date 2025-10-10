@@ -106,7 +106,5 @@ El enfoque modular y los filtros interactivos facilitan la exploración y la com
 📎 [Abrir dashboards en Looker Studio](https://lookerstudio.google.com/u/0/reporting/2d19f8b3-8325-450c-8fdd-f06a1ab07dec/page/p_rs4hi4mywd)
 
 
-## 🖼️ Captura de ejemplo
-Incluye en esta carpeta la imagen `dashboards_compas_logistica.png` que muestra ambos paneles.
 
 ---
